@@ -1,0 +1,14 @@
+{
+    "applications": {
+        "ModernMedia": {
+            "applicationId": "mequ79kBCNp74UrSEcoyty4Jwb3q9frUkuFrSsLE", 
+            "masterKey": "X96yEgg4bsVEqUgezgmDxUW9WFGxTApnjsa5M2OD"
+        }, 
+        "_default": {
+            "link": "ModernMedia"
+        }
+    }, 
+    "global": {
+        "parseVersion": "1.3.5"
+    }
+}
