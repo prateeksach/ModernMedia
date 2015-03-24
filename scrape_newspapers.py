@@ -46,6 +46,14 @@ if __name__ == '__main__':
                 pass
 
 
+        # Set all dataScrapped to False before processing
+        # allRows = list(Link.Query.all())
+        # for rowObj in allRows:
+        #     rowObj.dataScrapped = False
+        #     rowObj.save()
+
+
+
         ##------------------ 
         # Example website, delete for final version! 
         
@@ -55,19 +63,19 @@ if __name__ == '__main__':
         if len(url_check_exists) == 0:
                 urlObj = Link()
                 urlObj.url = url_ex
-                urlObj.read_status = False
+                urlObj.dataScrapped = False
                 urlObj.save()
 
         elif len(url_check_exists) == 1:
                 urlObj = url_check_exists[0]
-                urlObj.read_status = False
+                urlObj.dataScrapped = False
                 urlObj.save()
 
 
         ##------------------ 
 
-        # Yank all unread urls (read_status == False) from the table
-        unreadRows = list(Link.Query.filter(read_status=False))
+        # Yank all unread urls (dataScrapped == False) from the table
+        unreadRows = list(Link.Query.filter(dataScrapped=False))
         unreadURLs = [rowObj.url for rowObj in unreadRows]
         for idx, url in enumerate(unreadURLs):
                 article = newspaper.Article(url)
@@ -88,9 +96,9 @@ if __name__ == '__main__':
                 print "Article tags are: ", art_tags
                 raw_input("Press key to continue.")
 
-                # Once saved, update read_status to True
+                # Once saved, update dataScrapped to True
                 rowObj = unreadRows[idx]
-                rowObj.read_status = True
+                rowObj.dataScrapped = True
                 rowObj.save()
 
 
