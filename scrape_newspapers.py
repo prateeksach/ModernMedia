@@ -1,10 +1,11 @@
 # Usual libraries
 import os, sys
 import datetime
+import json
 
 # Using newspaper library. Download and install from http://newspaper.readthedocs.org/en/latest/
 try:
-        import newspaper 
+        import newspaper
 except:
         print "Install newspaper package, from http://newspaper.readthedocs.org/en/latest/"
         print "Installation:"
@@ -27,7 +28,7 @@ except:
 # def saveToParse(keylist):
 #         batcher = ParseBatcher()
 #         batcher.batch_save(keylist)
-# 
+#
 # def deleteFromParse(keylist):
 #         batcher = ParseBatcher()
 #         batcher.batch_delete(keylist)
@@ -40,7 +41,7 @@ if __name__ == '__main__':
         APPLICATION_ID = "mequ79kBCNp74UrSEcoyty4Jwb3q9frUkuFrSsLE"
         REST_API_KEY = "i8uGEe3rJhBPjPYccnxBsJajlendJc8b7CF5lAhC"
         register(APPLICATION_ID, REST_API_KEY)
-        
+
         # Inherit a ParseObject called Link which is the table object
         class Link(ParseObject):
                 pass
@@ -54,10 +55,10 @@ if __name__ == '__main__':
 
 
 
-        ##------------------ 
-        # Example website, delete for final version! 
-        
-        url_ex = "http://www.cnn.com/2015/03/23/world/isis-luring-westerners/index.html" 
+        ##------------------
+        # Example website, delete for final version!
+
+        url_ex = "http://www.cnn.com/2015/03/23/world/isis-luring-westerners/index.html"
         url_check_exists = list(Link.Query.filter(url = url_ex))
         # Avoid duplicating this link multiple times
         if len(url_check_exists) == 0:
@@ -72,7 +73,7 @@ if __name__ == '__main__':
                 urlObj.save()
 
 
-        ##------------------ 
+        ##------------------
 
         # Yank all unread urls (dataScrapped == False) from the table
         unreadRows = list(Link.Query.filter(dataScrapped=False))
@@ -89,12 +90,16 @@ if __name__ == '__main__':
                 art_content = article.text
                 art_tags = article.tags
 
-                print "Article title is: ", art_title
-                raw_input("Press key to continue.")
-                print "Article content is: ", art_content
-                raw_input("Press key to continue.")
-                print "Article tags are: ", art_tags
-                raw_input("Press key to continue.")
+                f = open("article" + idx + ".json", 'w')
+                json.dump({'title': art_title, 'content': art_content, 'tags': art_tags}, f)
+                f.close()
+
+                # print "Article title is: ", art_title
+                # raw_input("Press key to continue.")
+                # print "Article content is: ", art_content
+                # raw_input("Press key to continue.")
+                # print "Article tags are: ", art_tags
+                # raw_input("Press key to continue.")
 
                 # Once saved, update dataScrapped to True
                 rowObj = unreadRows[idx]
