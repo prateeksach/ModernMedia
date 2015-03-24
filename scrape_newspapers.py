@@ -90,7 +90,7 @@ if __name__ == '__main__':
                 art_content = article.text
                 art_tags = article.tags
 
-                f = open("article" + idx + ".json", 'w')
+                f = open("article" + str(idx) + ".json", 'w')
                 json.dump({'title': art_title, 'content': art_content, 'tags': art_tags}, f)
                 f.close()
 
