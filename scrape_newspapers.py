@@ -1,75 +1,97 @@
-""" 
-You guys will be using a REST API from python/scraping script to fetch the list of URLs to scrape
-(urls are stored in parse DB). And then update Parse as you scrape each link so we can remember it
-(also through a REST API). So while you're working on it, make a fake request that sends you a list
-of URLs and continue from there while I make the API for you tonight.
-"""
-
-
-# Using newspaper library. Download and install from http://newspaper.readthedocs.org/en/latest/
-import newspaper 
+# Usual libraries
 import os, sys
 import datetime
 
-# install ParsePy library: https://github.com/dgrtwo/ParsePy.git
-from parse_rest.connection import register, ParseBatcher
-from parse_rest.datatypes import Object as ParseObject
+# Using newspaper library. Download and install from http://newspaper.readthedocs.org/en/latest/
+try:
+        import newspaper 
+except:
+        print "Install newspaper package, from http://newspaper.readthedocs.org/en/latest/"
+        print "Installation:"
+        print "brew install libxml2 libxslt"
+        print "brew install libtiff libjpeg webp little-cms2"
+        print "pip install newspaper"
+        print "curl https://raw.githubusercontent.com/codelucas/newspaper/master/download_corpora.py | python2.7"
+        sys.exit()
+
+try:
+        from parse_rest.connection import register, ParseBatcher
+        from parse_rest.datatypes import Object as ParseObject
+except:
+        print "Install ParsePy library: https://github.com/dgrtwo/ParsePy.git",
+        print "pip install git+https://github.com/dgrtwo/ParsePy.git"
+        sys.exit()
 
 
-# Function getURL which pulls some URL out of a database. Returns a url.
-# Parse to python tutorial is found here: https://github.com/dgrtwo/ParsePy
-"""
-def saveToParse(urlDictionary):
+# These make batch updates easier, but I haven't had to use them. Keeping them in for later use if needed.
+# def saveToParse(keylist):
+#         batcher = ParseBatcher()
+#         batcher.batch_save(keylist)
+# 
+# def deleteFromParse(keylist):
+#         batcher = ParseBatcher()
+#         batcher.batch_delete(keylist)
 
-        batcher = ParseBatcher()
-        batcher.batchsave(urlDictionary)
-
-def queryFromParse(AllURLs,read_query):
-        # Assumed that database contains table with fields: url, read_status
-        # url contains the urls, read_status indicates "read" or "unread"
-        urlquery = list(ParseObject.Query.filter(read_status == read_query))
-        return urlquery
-
-
-
-"""
 
 if __name__ == '__main__':
 
-        """
-        APPLICATION_ID = "ENTER_APP_ID"
-        REST_API_KEY = "ENTER REST API KEY"
+
+        # Keys to the application
+        APPLICATION_ID = "mequ79kBCNp74UrSEcoyty4Jwb3q9frUkuFrSsLE"
+        REST_API_KEY = "i8uGEe3rJhBPjPYccnxBsJajlendJc8b7CF5lAhC"
         register(APPLICATION_ID, REST_API_KEY)
         
-        # Instantiate parse.com object imported as ParseObject
-        class AllURLs(ParseObject):
+        # Inherit a ParseObject called Link which is the table object
+        class Link(ParseObject):
                 pass
 
-        # Get a list of unread URLs
-        unreadURL = queryFromParse(AllURLs, "unread")
 
-        for url in unreadURL.keys():
-        ### DO THE SCRAPING BELOW.
-
-        """
-
-	# Output of getURL() goes here. Using a temporary URL to scrape.
-	url = "http://www.cnn.com/2015/03/23/world/isis-luring-westerners/index.html"
-
-	art = newspaper.Article(url)
-	art.download()
-	art.parse()
-
-	art_txt = art.text
-
-        """
-        unreadURL[url] = "read"
-        ### DONE.
-        """
-	# art_txt -> ML algorithms for text processing. 
-
-        """
-        # Update the parse database indicating that URL has been read
-        savetoParse(unreadURL)
-
+        ##------------------ 
+        # Example website, delete for final version! 
         
+        url_ex = "http://www.cnn.com/2015/03/23/world/isis-luring-westerners/index.html" 
+        url_check_exists = list(Link.Query.filter(url = url_ex))
+        # Avoid duplicating this link multiple times
+        if len(url_check_exists) == 0:
+                urlObj = Link()
+                urlObj.url = url_ex
+                urlObj.read_status = False
+                urlObj.save()
+
+        elif len(url_check_exists) == 1:
+                urlObj = url_check_exists[0]
+                urlObj.read_status = False
+                urlObj.save()
+
+
+        ##------------------ 
+
+        # Yank all unread urls (read_status == False) from the table
+        unreadRows = list(Link.Query.filter(read_status=False))
+        unreadURLs = [rowObj.url for rowObj in unreadRows]
+        for idx, url in enumerate(unreadURLs):
+                article = newspaper.Article(url)
+                # Download and parse the text in the article
+                article.download()
+                article.parse()
+
+                # DO: Store the text as .txt in a separate folder locally
+                # FOR NOW: just printing the text onto terminal
+                art_title = article.title
+                art_content = article.text
+                art_tags = article.tags
+
+                print "Article title is: ", art_title
+                raw_input("Press key to continue.")
+                print "Article content is: ", art_content
+                raw_input("Press key to continue.")
+                print "Article tags are: ", art_tags
+                raw_input("Press key to continue.")
+
+                # Once saved, update read_status to True
+                rowObj = unreadRows[idx]
+                rowObj.read_status = True
+                rowObj.save()
+
+
+
