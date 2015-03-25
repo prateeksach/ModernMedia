@@ -8,18 +8,14 @@ try:
         import newspaper
 except:
         print "Install newspaper package, from http://newspaper.readthedocs.org/en/latest/"
-        print "Installation:"
-        print "brew install libxml2 libxslt"
-        print "brew install libtiff libjpeg webp little-cms2"
-        print "pip install newspaper"
-        print "curl https://raw.githubusercontent.com/codelucas/newspaper/master/download_corpora.py | python2.7"
+        print "Installation: pip install newspaper"
         sys.exit()
 
 try:
         from parse_rest.connection import register, ParseBatcher
         from parse_rest.datatypes import Object as ParseObject
 except:
-        print "Install ParsePy library: https://github.com/dgrtwo/ParsePy.git",
+        print "Install ParsePy library: https://github.com/dgrtwo/ParsePy.git"
         print "pip install git+https://github.com/dgrtwo/ParsePy.git"
         sys.exit()
 
