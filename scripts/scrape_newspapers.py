@@ -43,36 +43,39 @@ if __name__ == '__main__':
                 pass
 
 
-        # Set all dataScrapped to False before processing
-        # allRows = list(Link.Query.all())
+        #Set all dataScrapped to False before processing
+        # allquery = Link.Query.all()
+        # allRows = allquery.limit(1000)
+        # print len(allRows)
         # for rowObj in allRows:
         #     rowObj.dataScrapped = False
         #     rowObj.save()
 
+        
+
+        # ##------------------
+        # # Example website, delete for final version!
+
+        # url_ex = "http://www.cnn.com/2015/03/23/world/isis-luring-westerners/index.html"
+        # url_check_exists = list(Link.Query.filter(url = url_ex))
+        # # Avoid duplicating this link multiple times
+        # if len(url_check_exists) == 0:
+        #         urlObj = Link()
+        #         urlObj.url = url_ex
+        #         urlObj.dataScrapped = False
+        #         urlObj.save()
+
+        # elif len(url_check_exists) == 1:
+        #         urlObj = url_check_exists[0]
+        #         urlObj.dataScrapped = False
+        #         urlObj.save()
 
 
-        ##------------------
-        # Example website, delete for final version!
-
-        url_ex = "http://www.cnn.com/2015/03/23/world/isis-luring-westerners/index.html"
-        url_check_exists = list(Link.Query.filter(url = url_ex))
-        # Avoid duplicating this link multiple times
-        if len(url_check_exists) == 0:
-                urlObj = Link()
-                urlObj.url = url_ex
-                urlObj.dataScrapped = False
-                urlObj.save()
-
-        elif len(url_check_exists) == 1:
-                urlObj = url_check_exists[0]
-                urlObj.dataScrapped = False
-                urlObj.save()
-
-
-        ##------------------
+        # ##------------------
 
         # Yank all unread urls (dataScrapped == False) from the table
-        unreadRows = list(Link.Query.filter(dataScrapped=False))
+        unreadRows = list(Link.Query.filter(dataScrapped=False).limit(1000))
+        
         unreadURLs = [rowObj.url for rowObj in unreadRows]
         for idx, url in enumerate(unreadURLs):
                 article = newspaper.Article(url)
@@ -80,14 +83,15 @@ if __name__ == '__main__':
                 article.download()
                 article.parse()
 
-                # DO: Store the text as .txt in a separate folder locally
-                # FOR NOW: just printing the text onto terminal
-                art_title = article.title
-                art_content = article.text
-                art_tags = article.tags
+                # Extract title, text content and tags. Python doesn't interact well with ASCII
+                # encoding, so encode all text to utf-8 before storing. 
+                art_title = article.title.encode('utf-8')
+                art_content = article.text.encode('utf-8')
+                art_tags = set([tag.encode('utf-8') for tag in article.tags])
 
                 f = open("article" + str(idx) + ".json", 'w')
                 json.dump({'title': str(art_title), 'content': str(art_content), 'tags': str(art_tags)}, f)
+                # json.dump({'title': str(art_title), 'content': str(art_content)}, f)
                 f.close()
 
                 # print "Article title is: ", art_title
