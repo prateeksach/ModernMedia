@@ -44,25 +44,9 @@ Parse.Cloud.define("addLink", function(request, response) {
 	})
 });
 
-// Get a list of all unscrapped links
-Parse.Cloud.define("addLink", function(request, response) {
-	var query = new Parse.Query(Link);
-	query.equalTo("dataScrapped", false);
-
-	query.find({
-		useMasterKey: true,
-		success: function(list) {
-			response.success(list);
-		},
-		error: function(error) {
-			response.error(error);
-		}
-	})
-});
-
-// Mark a link as scrapped
-Parse.Cloud.define("markAsScrapped", function(request, response) {
-  	if(!request.params.url) {
+// Add new label
+Parse.Cloud.define("addLabel", function(request, response) {
+  	if(!request.params.url || !request.params.yellowLabel || !request.params.politicalLabel || !request.params.positionLabel) {
 		response.error("Error: Invalid parameters.");
 		return;
 	}
@@ -74,7 +58,10 @@ Parse.Cloud.define("markAsScrapped", function(request, response) {
 		useMasterKey: true,
 		success: function(item) {
 			if(item) {
-				item.set("dataScrapped", true);
+				item.set("yellowLabels", item.get("yellowLabels") ? item.get("yellowLabels").push(request.params.yellowLabel) : [request.params.yellowLabel]);
+				item.set("politicalLabels", item.get("politicalLabels") ? item.get("politicalLabels").push(request.params.politicalLabel) : [request.params.politicalLabel]);
+				item.set("positionLabels", item.get("positionLabels") ? item.get("positionLabels").push(request.params.positionLabel) : [request.params.positionLabel]);
+
 				item.save(null, {
 					useMasterKey: true,
 					success: function() {
@@ -87,6 +74,51 @@ Parse.Cloud.define("markAsScrapped", function(request, response) {
 			} else {
 				response.error("Link does not exist.");
 			}
+		},
+		error: function(error) {
+			response.error(error);
+		}
+	})
+});
+
+// Get a list of links to label
+Parse.Cloud.define("getLinksToLabel", function(request, response) {
+	var query = new Parse.Query(Link);
+	query.equalTo("yellowLabels", null);
+	query.equalTo("politicalLabels", null);
+	query.equalTo("positionLabels", null);
+
+	query.find({
+		useMasterKey: true,
+		success: function(list) {
+			var result = [];
+
+			list.forEach(function(link) {
+				result.push(link.get("url"));
+			});
+
+			response.success(result);
+		},
+		error: function(error) {
+			response.error(error);
+		}
+	})
+});
+
+// Get a list of links to label
+Parse.Cloud.define("getLinkToLabel", function(request, response) {
+	var query = new Parse.Query(Link);
+	query.equalTo("yellowLabels", null);
+	query.equalTo("politicalLabels", null);
+	query.equalTo("positionLabels", null);
+
+	query.first({
+		useMasterKey: true,
+		success: function(item) {
+			if(item)
+				response.success({"url": item.get("url")});
+			else
+				response.success({});
 		},
 		error: function(error) {
 			response.error(error);

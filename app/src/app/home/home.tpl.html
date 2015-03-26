@@ -1,33 +1,30 @@
-<div class="marketing">
-  <div class="row">
-    <div class="col-md-12">
-      <h1>Add a Link</h1>
-      <p>
-      BEWARE: Please remove get variables at the end of URLs (anything with ? or & should be removed) but obviously, make sure the URL still works before you submit.
-      </p>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-6">
-      <form>
-        <div class="form-group">
-          <label for="urlInput">Link URL</label>
-          <input id="urlInput" type="text" class="form-control" placeholder="http://example.com" ng-model="addLink.url" />
-        </div>
-
-        <div class="form-group">
-          <label for="topicInput">Article Topic</label>
-          <input id="topicInput" type="text" class="form-control" placeholder="ISIS, Crimea, etc." ng-model="addLink.topic" />
-        </div>
-
-        <div class="form-group">
-          <label for="orgInput">Article Organization</label>
-          <input id="orgInput" type="text" class="form-control" placeholder="Fox, CNN, etc." ng-model="addLink.org" />
-        </div>
-
-        <button type="submit" class="btn btn-default" ng-click="addLink()">Add</button>
-      </form>
-    </div>
+<div class="row">
+  <div class="col-md-12">
+    <h1>Add a Link</h1>
+    <p>
+    BEWARE: Please remove get variables at the end of URLs (anything with ? or & should be removed) but obviously, make sure the URL still works before you submit.
+    </p>
   </div>
 </div>
+<div class="row">
+  <div class="col-md-6">
+    <form>
+      <div class="form-group">
+        <label for="urlInput">Link URL</label>
+        <input id="urlInput" type="text" class="form-control" placeholder="http://example.com" ng-model="addObj.url" />
+      </div>
 
+      <div class="form-group">
+        <label for="topicInput">Article Topic</label>
+        <input id="topicInput" type="text" class="form-control" placeholder="ISIS, Crimea, etc." ng-model="addObj.topic" />
+      </div>
+
+      <div class="form-group">
+        <label for="orgInput">Article Organization</label>
+        <input id="orgInput" type="text" class="form-control" placeholder="Fox, CNN, etc." ng-model="addObj.org" />
+      </div>
+
+      <button type="submit" class="btn btn-default" ng-click="addLink()">Add</button>
+    </form>
+  </div>
+</div>

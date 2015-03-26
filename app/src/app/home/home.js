@@ -32,7 +32,7 @@ angular.module( 'ngBoilerplate.home', [
         templateUrl: 'home/home.tpl.html'
       }
     },
-    data:{ pageTitle: 'Home' }
+    data:{ pageTitle: 'Add Link' }
   });
 })
 
@@ -40,17 +40,17 @@ angular.module( 'ngBoilerplate.home', [
  * And of course we define a controller for our route.
  */
 .controller( 'HomeCtrl', function HomeController( $scope ) {
-  $scope.addLink = {"url": "", "topic": "", "org": ""};
+  $scope.addObj = {"url": "", "topic": "", "org": ""};
 
   $scope.addLink = function() {
-    if(!$scope.addLink.url || !$scope.addLink.topic || !$scope.addLink.org) {
+    if(!$scope.addObj.url || !$scope.addObj.topic || !$scope.addObj.org) {
       alert("Please enter all fields.");
       return;
     }
 
-    Parse.Cloud.run("addLink", $scope.addLink).then(function() {
+    Parse.Cloud.run("addLink", $scope.addObj).then(function() {
       alert("Added successfully.");
-      $scope.addLink = {"url": "", "topic": "", "org": ""};
+      $scope.addObj = {"url": "", "topic": "", "org": ""};
     }, function(error) {
       console.log(error);
       if(error.message)
