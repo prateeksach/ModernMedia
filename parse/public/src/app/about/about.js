@@ -25,6 +25,33 @@ angular.module( 'ngBoilerplate.about', [
   $scope.isLoadingLinks = false;
   $scope.noNewLinks = false;
 
+  $scope.getStats = function() {
+    var Link = Parse.Object.extend("Link");
+    var query = new Parse.Query(Link);
+    query.limit(202);
+    query.find({
+      success: function(links) {
+        var yellowLabelStats = {"yellow": 0, "nonyellow": 0}, politicalLabelStats = {"conservative": 0, "liberal": 0, "neutral": 0}, positionLabelStats = {"critical": 0, "defensive": 0, "factual": 0};
+
+        links.forEach(function(link) {
+          yellowLabelStats[link.get("yellowLabels")[0]]++;
+          politicalLabelStats[link.get("politicalLabels")[0]]++;
+          positionLabelStats[link.get("positionLabels")[0]]++;
+        })
+
+        console.log(yellowLabelStats);
+        console.log(politicalLabelStats);
+        console.log(positionLabelStats);
+      },
+      error: function(error) {
+        console.log("links error");
+        console.log(error);
+      }
+    })
+  }
+
+  $scope.getStats();
+
   $scope.fetchUrlLink = function() {
     if($scope.isLoadingLinks)
       return;
