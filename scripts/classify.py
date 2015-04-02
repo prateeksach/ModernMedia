@@ -5,9 +5,9 @@ import sklearn
 
 training_folder = "data/"
 
-categories = {'yellowness': ('yellow', 'non-yellow'),
-              'affilation': ('conservative', 'liberal', 'neutral'),
-              'harshness': ('critical', 'defensive', 'factual')}
+categories = {'yellow': ('yellow', 'nonyellow'),
+              'political': ('conservative', 'liberal', 'neutral'),
+              'position': ('critical', 'defensive', 'factual')}
 
 def organizeData():
     trainingData = {}
@@ -15,8 +15,8 @@ def organizeData():
     # data -> ['article1', 'article2', ...]
     # target -> [1, 2, 3, 2, 1, 3, ...] 1 = conservative, 2 = liberal, ... etc.
 
-    for key in categories:
-        trainingData[key] = {'data': [], \
+    for category in categories:
+        trainingData[category] = {'data': [], \
                              'target': []}
 
     files = os.listdir(training_folder)
@@ -25,17 +25,23 @@ def organizeData():
             s = ''
             # read in file, assign target for each category
 
-def classifyYellowness():
-    pass
+def trainClassifier(data):
+    classifiers = {}
+    for category in categories:
+        text_clf = Pipeline([('vect', CountVectorizer()),\
+                             ('tfidf', TfidfTransformer()),\
+                             ('clf', SGDClassifier(loss='hinge',\
+                                                   penalty='l2',\
+                                                   alpha=1e-3,
+                                                   n_iter=5))])
+        _ = text_clf.fit(data[category]['data'], data[category]['target'])
+        classifiers[category] = text_clf
 
-def classifyAffilation():
-    pass
-
-def classifyHarshness():
-    pass
+    return classifiers
 
 def main():
-    pass
+    trainingData = gatherData()
+    classifiers = trainClassifier(trainingData)
 
 if __name__ == "__main__":
     main()
