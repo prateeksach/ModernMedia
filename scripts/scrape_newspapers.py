@@ -53,31 +53,13 @@ if __name__ == '__main__':
 
         
 
-        # ##------------------
-        # # Example website, delete for final version!
-
-        # url_ex = "http://www.cnn.com/2015/03/23/world/isis-luring-westerners/index.html"
-        # url_check_exists = list(Link.Query.filter(url = url_ex))
-        # # Avoid duplicating this link multiple times
-        # if len(url_check_exists) == 0:
-        #         urlObj = Link()
-        #         urlObj.url = url_ex
-        #         urlObj.dataScrapped = False
-        #         urlObj.save()
-
-        # elif len(url_check_exists) == 1:
-        #         urlObj = url_check_exists[0]
-        #         urlObj.dataScrapped = False
-        #         urlObj.save()
-
-
-        # ##------------------
 
         # Yank all unread urls (dataScrapped == False) from the table
         unreadRows = list(Link.Query.filter(dataScrapped=False).limit(1000))
         
-        unreadURLs = [rowObj.url for rowObj in unreadRows]
-        for idx, url in enumerate(unreadURLs):
+        for idx, row in enumerate(unreadRows):
+                url = row.url
+
                 article = newspaper.Article(url)
                 # Download and parse the text in the article
                 article.download()
@@ -89,8 +71,14 @@ if __name__ == '__main__':
                 art_content = article.text.encode('utf-8')
                 art_tags = set([tag.encode('utf-8') for tag in article.tags])
 
+                
+                polLabel = row.politicalLabels
+                posLabel = row.positionLabels
+                yelLabel = row.yellowLabels
+
                 f = open("article" + str(idx) + ".json", 'w')
-                json.dump({'title': str(art_title), 'content': str(art_content), 'tags': str(art_tags)}, f)
+                json.dump({'title': str(art_title), 'content': str(art_content), 'tags': str(art_tags), 
+                    'positionLabels': posLabel, 'politicalLabels': polLabel, 'yelLabel': yelLabel}, f)
                 # json.dump({'title': str(art_title), 'content': str(art_content)}, f)
                 f.close()
 
