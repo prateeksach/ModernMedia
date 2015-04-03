@@ -32,7 +32,7 @@ def organizeData():
                 label = json_file[category]
                 trainingData[category].append(categoryTargets[category][label])
 
-def trainClassifier(data):
+def trainSVMClassifier(data):
     classifiers = {}
     for category in categories:
         text_clf = Pipeline([('vect', CountVectorizer()),\
@@ -46,9 +46,30 @@ def trainClassifier(data):
 
     return classifiers
 
+def trainNaiveBayesClassifier(data):
+    classifiers = {}
+    for category in categories:
+        text_clf = Pipeline([('vect', CountVectorizer()),\
+                             ('tfidf', TfidfTransformer()),\
+                             ('clf', MultinomialNB())])
+        text_clf = text_clf.fit(data['data'], data[category])
+        classifiers[category] = text_clf
+
+    return classifiers
+
 def main():
+    algorithm = sys.argv[1]
+
     trainingData = gatherData()
-    classifiers = trainClassifier(trainingData)
+
+    if algorithm == 'naivebayes':
+        classifiers = trainNaiveBayesClassifier(trainingData)
+    elif algorithm == 'svm':
+        classifiers = trainSVMClassifier(trainingData)
+    else:
+        classifiers = trainSVMClassifier(trainingData)
+
+
 
 if __name__ == "__main__":
     main()
