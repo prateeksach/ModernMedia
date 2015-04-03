@@ -3,24 +3,31 @@ import sys
 import json
 import sklearn
 
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import SGDClassifier
+
+
 training_folder = "data/"
 
-categories = {'yellow': ('yellow', 'nonyellow'),
-              'political': ('conservative', 'liberal', 'neutral'),
-              'position': ('critical', 'defensive', 'factual')}
-categoryTargets = {'yellow': {'yellow': 1, 'nonyellow': 2},
-                   'political': {'conservative': 1, 'liberal': 2, 'neutral': 3},
-                   'position': {'critical': 1, 'defensive': 2, 'factual': 3}}
+categories = {'yelLabel': ('yellow', 'nonyellow'),
+              'politicalLabels': ('conservative', 'liberal', 'neutral'),
+              'positionLabels': ('critical', 'defensive', 'factual')}
+categoryTargets = {'yelLabel': {'yellow': 1, 'nonyellow': 2},
+                   'politicalLabels': {'conservative': 1, 'liberal': 2, 'neutral': 3},
+                   'positionLabels': {'critical': 1, 'defensive': 2, 'factual': 3}}
 
 def organizeData():
-    trainingData = {} # { 'data': ['article1', 'article2'], 'yellow': [targets], ... }
+    # { 'data': ['article1', 'article2'], 'yellow': [targets], ... }
+    trainingData = {'data': []}
 
     # data -> ['article1', 'article2', ...]
     # target -> [1, 2, 3, 2, 1, 3, ...] 1 = conservative, 2 = liberal, ... etc.
 
     for category in categories:
-        trainingData[category] = {'data': [], \
-                             'target': []}
+        trainingData[category] = []
 
     files = os.listdir(training_folder)
     for training_file in files:
@@ -29,8 +36,10 @@ def organizeData():
             json_file = json.load(f)
             trainingData['data'].append(json_file['content'])
             for category in categories:
-                label = json_file[category]
+                label = json_file[category][0]
                 trainingData[category].append(categoryTargets[category][label])
+
+    return trainingData
 
 def trainSVMClassifier(data):
     classifiers = {}
@@ -60,7 +69,7 @@ def trainNaiveBayesClassifier(data):
 def main():
     algorithm = sys.argv[1]
 
-    trainingData = gatherData()
+    trainingData = organizeData()
 
     if algorithm == 'naivebayes':
         classifiers = trainNaiveBayesClassifier(trainingData)
