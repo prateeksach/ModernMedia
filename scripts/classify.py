@@ -11,6 +11,7 @@ from sklearn.linear_model import SGDClassifier
 
 
 training_folder = "data/"
+test_folder = "test/"
 
 categories = {'yelLabel': ('yellow', 'nonyellow'),
               'politicalLabels': ('conservative', 'liberal', 'neutral'),
@@ -66,6 +67,22 @@ def trainNaiveBayesClassifier(data):
 
     return classifiers
 
+def testClassifier(classifiers):
+    test_docs = []
+    files = os.listdir(test_folder)
+    for test_file in files:
+        with open(test_folder + test_file, 'r') as f:
+            json_file = json.load(f)
+            test_docs.append(json_file['content'])
+
+    for category in categories:
+        predicted = classifiers[category].predict(test_docs)
+
+        print "\nClassification of " + category + "\n"
+        #import ipdb; ipdb.set_trace()
+        for i, prediction in enumerate(predicted):
+            print files[i] + ',' + categories[category][prediction-1]
+
 def main():
     algorithm = sys.argv[1]
 
@@ -78,7 +95,7 @@ def main():
     else:
         classifiers = trainSVMClassifier(trainingData)
 
-
+    testClassifier(classifiers)
 
 if __name__ == "__main__":
     main()
