@@ -8,17 +8,17 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDClassifier
-
+from sklearn import cross_validation
 
 training_folder = "data/"
 test_folder = "test/"
 
-categories = {'yelLabel': ('yellow', 'nonyellow'),
-              'politicalLabels': ('conservative', 'liberal', 'neutral'),
-              'positionLabels': ('critical', 'defensive', 'factual')}
-categoryTargets = {'yelLabel': {'yellow': 1, 'nonyellow': 2},
-                   'politicalLabels': {'conservative': 1, 'liberal': 2, 'neutral': 3},
-                   'positionLabels': {'critical': 1, 'defensive': 2, 'factual': 3}}
+categories = {'yellowLabel': ('Yellow', 'Not Yellow') }
+#               'politicalLabel': ('Conservative', 'Liberal', 'Neutral'),
+#               'opinionLabel': ('Biased', 'Not Biased')}
+categoryTargets = {'yellowLabel': {'Yellow': 1, 'Not Yellow': 2} }
+#                   'politicalLabel': {'Conservative': 1, 'Liberal': 2, 'Neutral': 3},
+#                   'biasLabel': {'Biased': 1, 'Not Biased': 2}}
 
 def organizeData():
     # { 'data': ['article1', 'article2'], 'yellow': [targets], ... }
@@ -51,7 +51,15 @@ def trainSVMClassifier(data):
                                                    penalty='l2',\
                                                    alpha=1e-3,
                                                    n_iter=5))])
-        _ = text_clf.fit(data['data'], data[category])
+        loo = cross_validation.LeaveOneOut(len(data['data']))
+        correct = 0
+        for train_index, test_index in loo:
+            _ = text_clf.fit([data['data'].index(i) for i in train_index], [data[category].index(i) for i in train_index])
+            predicted = text_clf.predict(data['data'][test_index])
+            if predicted == data[category][test_index]:
+                print "Article ", str(text_index), "is", categories[category][predicted]
+                correct += 1
+        print "Accuracy ", str(float(correct)/len(data['data']))
         classifiers[category] = text_clf
 
     return classifiers
@@ -95,7 +103,7 @@ def main():
     else:
         classifiers = trainSVMClassifier(trainingData)
 
-    testClassifier(classifiers)
+    # testClassifier(classifiers)
 
 if __name__ == "__main__":
     main()
