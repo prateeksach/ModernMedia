@@ -10,7 +10,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDClassifier
 from sklearn import cross_validation
 
-training_folder = "data/"
+training_folder = "new_data/"
 test_folder = "test/"
 
 categories = {'yellowLabel': ('Yellow', 'Not Yellow') }
@@ -35,9 +35,9 @@ def organizeData():
         # read in file, assign target for each category
         with open(training_folder + training_file, 'r') as f:
             json_file = json.load(f)
-            trainingData['data'].append(json_file['content'])
+            trainingData['data'].append(json_file['title'])
             for category in categories:
-                label = json_file[category][0]
+                label = json_file[category]
                 trainingData[category].append(categoryTargets[category][label])
 
     return trainingData
@@ -53,13 +53,25 @@ def trainSVMClassifier(data):
                                                    n_iter=5))])
         loo = cross_validation.LeaveOneOut(len(data['data']))
         correct = 0
+        total = len(data['data'])
+
         for train_index, test_index in loo:
-            _ = text_clf.fit([data['data'].index(i) for i in train_index], [data[category].index(i) for i in train_index])
-            predicted = text_clf.predict(data['data'][test_index])
-            if predicted == data[category][test_index]:
-                print "Article ", str(text_index), "is", categories[category][predicted]
-                correct += 1
-        print "Accuracy ", str(float(correct)/len(data['data']))
+            if data[category][test_index[0]] == 1:
+                total -= 1
+                continue
+            _ = text_clf.fit([data['data'][i] for i in train_index], [data[category][i] for i in train_index])
+            predicted = text_clf.predict([data['data'][test_index[0]]])
+
+            #print predicted, data['data'][test_index[0]], '\n\n\n'
+            try:
+                print "Article ", str(os.listdir(training_folder)[test_index[0]]), "is", categories[category][predicted[0]-1], "; Correct is", categories[category][data[category][test_index[0]]-1]
+                if predicted[0] == data[category][test_index[0]]:
+                    #import ipdb; ipdb.set_trace()
+                    correct += 1
+            except:
+                total -= 1
+                continue
+        print "Accuracy ", str(float(correct)/total)
         classifiers[category] = text_clf
 
     return classifiers
@@ -87,9 +99,13 @@ def testClassifier(classifiers):
         predicted = classifiers[category].predict(test_docs)
 
         print "\nClassification of " + category + "\n"
-        #import ipdb; ipdb.set_trace()
+        #
         for i, prediction in enumerate(predicted):
             print files[i] + ',' + categories[category][prediction-1]
+
+def analysis(data):
+    count_vect = CountVectorizer()
+    X_new_counts = count_vect.transform()
 
 def main():
     algorithm = sys.argv[1]
