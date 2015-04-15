@@ -9,6 +9,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDClassifier
 from sklearn import cross_validation
+from sklearn.svm import LinearSVC
 
 training_folder = "new_data/"
 test_folder = "test/"
@@ -47,16 +48,13 @@ def trainSVMClassifier(data):
     for category in categories:
         text_clf = Pipeline([('vect', CountVectorizer()),\
                              ('tfidf', TfidfTransformer()),\
-                             ('clf', SGDClassifier(loss='hinge',\
-                                                   penalty='l2',\
-                                                   alpha=1e-3,
-                                                   n_iter=5))])
+                             ('clf', LinearSVC())])
         loo = cross_validation.LeaveOneOut(len(data['data']))
         correct = 0
         total = len(data['data'])
 
         for train_index, test_index in loo:
-            if data[category][test_index[0]] == 1:
+            if data[category][test_index[0]] == 2:
                 total -= 1
                 continue
             _ = text_clf.fit([data['data'][i] for i in train_index], [data[category][i] for i in train_index])
