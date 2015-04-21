@@ -2,12 +2,12 @@
 var _ = require('underscore');
 
 // Parse Objects
-var Link = Parse.Object.extend("Link");
+var Link = Parse.Object.extend("Link2");
 var Label = Parse.Object.extend("Label");
 
 // Add new link to database
 Parse.Cloud.define("addLink", function(request, response) {
-  	if(!request.params.url || !request.params.topic || !request.params.org) {
+  	if(!request.params.url || !request.params.topic || !request.params.org || !request.params.yellowLabel || !request.params.politicalLabel || !request.params.biasLabel || !request.params.opinionLabel) {
 		response.error("Error: Invalid parameters.");
 		return;
 	}
@@ -25,6 +25,10 @@ Parse.Cloud.define("addLink", function(request, response) {
 				link.set("url", request.params.url);
 				link.set("topic", request.params.topic);
 				link.set("organization", request.params.org);
+				link.set("yellowLabel", request.params.yellowLabel);
+				link.set("politicalLabel", request.params.politicalLabel);
+				link.set("biasLabel", request.params.biasLabel);
+				link.set("opinionLabel", request.params.opinionLabel);
 				link.set("dataScrapped", false);
 
 				link.save(null, {
