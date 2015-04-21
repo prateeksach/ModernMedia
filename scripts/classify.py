@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
 
     pwd = getcwd()
-    datafolder = path.join(pwd,'new_data')
+    datafolder = path.join(pwd,'project_data')
 
     filelist = []
     for root,subdirs,files in walk(datafolder):
