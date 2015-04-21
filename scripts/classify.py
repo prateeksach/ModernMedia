@@ -37,6 +37,7 @@ if __name__ == '__main__':
             with open(trainfile, 'r') as f:
                 json_file = json.load(f)
 
+                #### TODO: change the uncommenting part as argument to program?
                 ## Uncomment line below to train on content
                 ## trainingData.append(json_file['content'])
                 ## Uncomment line below to train on titles
