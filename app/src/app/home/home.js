@@ -14,7 +14,6 @@
  */
 angular.module( 'ngBoilerplate.home', [
   'ui.router',
-  'plusOne',
   'parse-angular'
 ])
 
@@ -40,24 +39,33 @@ angular.module( 'ngBoilerplate.home', [
  * And of course we define a controller for our route.
  */
 .controller( 'HomeCtrl', function HomeController( $scope ) {
-  $scope.addObj = {"url": "", "topic": "", "org": ""};
+  $scope.addObj = {"url": "", "topic": "", "org": "", "yellowLabel": "", "politicalLabel": "", "biasLabel": "", "opinionLabel": ""};
+  $scope.isAddingLink = false;
 
   $scope.addLink = function() {
-    if(!$scope.addObj.url || !$scope.addObj.topic || !$scope.addObj.org) {
+    if($scope.isAddingLink)
+      return;
+
+    if(!$scope.addObj.url || !$scope.addObj.topic || !$scope.addObj.org || !$scope.addObj.yellowLabel || !$scope.addObj.politicalLabel || !$scope.addObj.biasLabel || !$scope.addObj.opinionLabel) {
       alert("Please enter all fields.");
       return;
     }
 
+    $scope.isAddingLink = true;
+
     Parse.Cloud.run("addLink", $scope.addObj).then(function() {
       alert("Added successfully.");
-      $scope.addObj = {"url": "", "topic": "", "org": ""};
+
+      $scope.addObj.url = ""
+      $scope.isAddingLink = false;
     }, function(error) {
+      $scope.isAddingLink = false;
+
       console.log(error);
       if(error.message)
         alert(error.message + " Please try again or check the console for the error.");
       else
         alert("An error occured. Please try again or check the console for the error.");
-      return;
     });
   }
 })

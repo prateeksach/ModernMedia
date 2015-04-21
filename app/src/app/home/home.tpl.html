@@ -16,15 +16,80 @@
 
       <div class="form-group">
         <label for="topicInput">Article Topic</label>
-        <input id="topicInput" type="text" class="form-control" placeholder="ISIS, Crimea, etc." ng-model="addObj.topic" />
+        <select class="form-control" ng-model="addObj.topic">
+          <option value="Marijuana Legalization">Marijuana Legalization</option>
+          <option value="Abortion">Abortion</option>
+          <option value="Gay Marriage">Gay Marriage</option>
+          <option value="NSA Spying">NSA Spying</option>
+          <option value="Obamacare">Obamacare</option>
+          <option value="Climate Change">Climate Change</option>
+          <option value="Immigration">Immigration</option>
+          <option value="Gun Control">Gun Control</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label for="orgInput">Article Organization</label>
-        <input id="orgInput" type="text" class="form-control" placeholder="Fox, CNN, etc." ng-model="addObj.org" />
+        <select class="form-control" ng-model="addObj.org">
+          <option value="USA Today">USA Today</option>
+          <option value="New York Post">New York Post</option>
+          <option value="CNN">CNN</option>
+          <option value="FOX">FOX</option>
+          <option value="ThinkProgress">ThinkProgress</option>
+          <option value="Huffington Post">Huffington Post</option>
+          <option value="New Republic">New Republic</option>
+          <option value="LA Times">LA Times</option>
+          <option value="New York Times">New York Times</option>
+        </select>
       </div>
 
-      <button type="submit" class="btn btn-default" ng-click="addLink()">Add</button>
+      <div class="form-group">
+        <label for="topicInput">Yellowism Label:&nbsp;&nbsp;&nbsp;</label>
+        <label class="radio-inline">
+          <input type="radio" name="yellowLabel" value="Yellow" ng-model="addObj.yellowLabel"> Yellow
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="yellowLabel" value="Not Yellow" ng-model="addObj.yellowLabel"> Not Yellow
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="topicInput">Political Label:&nbsp;&nbsp;&nbsp;</label>
+        <label class="radio-inline">
+          <input type="radio" name="politicalLabel" value="Conservative" ng-model="addObj.politicalLabel"> Conservative
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="politicalLabel" value="Liberal" ng-model="addObj.politicalLabel"> Liberal
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="politicalLabel" value="Neutral" ng-model="addObj.politicalLabel"> Neutral
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="topicInput">Bias Label:&nbsp;&nbsp;&nbsp;</label>
+        <label class="radio-inline">
+          <input type="radio" name="biasLabel" value="Biased" ng-model="addObj.biasLabel"> Biased
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="biasLabel" value="Not Biased" ng-model="addObj.biasLabel"> Not Biased
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="topicInput">Opinion Label:&nbsp;&nbsp;&nbsp;</label>
+        <label class="radio-inline">
+          <input type="radio" name="opinionLabel" value="Opinion Article" ng-model="addObj.opinionLabel"> Opinion Article
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="opinionLabel" value="Other" ng-model="addObj.opinionLabel"> Other
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-default" ng-click="addLink()">
+        <span ng-if="isAddingLink">Adding... Please Wait.</span>
+        <span ng-if="!isAddingLink">Add Link</span>
+      </button>
     </form>
   </div>
 </div>

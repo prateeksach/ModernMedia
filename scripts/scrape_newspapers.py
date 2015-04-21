@@ -38,13 +38,13 @@ if __name__ == '__main__':
         REST_API_KEY = "i8uGEe3rJhBPjPYccnxBsJajlendJc8b7CF5lAhC"
         register(APPLICATION_ID, REST_API_KEY)
 
-        # Inherit a ParseObject called Link which is the table object
-        class Link(ParseObject):
+        # Inherit a ParseObject called Link2 which is the table object
+        class Link2(ParseObject):
                 pass
 
 
         #Set all dataScrapped to False before processing
-        # allquery = Link.Query.all()
+        # allquery = Link2.Query.all()
         # allRows = allquery.limit(1000)
         # print len(allRows)
         # for rowObj in allRows:
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
 
         # Yank all unread urls (dataScrapped == False) from the table
-        unreadRows = list(Link.Query.filter(dataScrapped=False).limit(1000))
+        unreadRows = list(Link2.Query.filter(dataScrapped=False).limit(1000))
         
         for idx, row in enumerate(unreadRows):
                 url = row.url
@@ -72,13 +72,18 @@ if __name__ == '__main__':
                 art_tags = set([tag.encode('utf-8') for tag in article.tags])
 
                 
-                polLabel = row.politicalLabels
-                posLabel = row.positionLabels
-                yelLabel = row.yellowLabels
+                politicalLabel = row.politicalLabel
+                yellowLabel = row.yellowLabel
+                opinionLabel = row.opinionLabel
+                biasLabel = row.biasLabel
+                organization = row.organization
+                topic = row.topic
+
 
                 f = open("article" + str(idx) + ".json", 'w')
                 json.dump({'title': str(art_title), 'content': str(art_content), 'tags': str(art_tags), 
-                    'positionLabels': posLabel, 'politicalLabels': polLabel, 'yelLabel': yelLabel}, f)
+                    'politicalLabel': politicalLabel, 'yellowLabel': yellowLabel, 
+                    'opinionLabel':opinionLabel, 'biasLabel':biasLabel, 'organization':organization, 'topic':topic}, f)
                 # json.dump({'title': str(art_title), 'content': str(art_content)}, f)
                 f.close()
 

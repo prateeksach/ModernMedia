@@ -1,160 +1,137 @@
-import os
-import sys
+# Standard imports
+from os import walk, path, getcwd, listdir
+from sys import exit, argv
+from math import log10
+import re
 import json
-import sklearn
 
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.pipeline import Pipeline
-from sklearn.linear_model import SGDClassifier
-from sklearn import cross_validation
+# Libraries for ML algorithms
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn import svm, naive_bayes
 
-training_folder = "new_data/"
-test_folder = "test/"
+if __name__ == '__main__':
 
-# describes the categories, you can uncomment lines to train and classify on other categories
-categories = {'yellowLabel': ('Yellow', 'Not Yellow') }
-#               'politicalLabel': ('Conservative', 'Liberal', 'Neutral'),
-#               'opinionLabel': ('Biased', 'Not Biased')}
-categoryTargets = {'yellowLabel': {'Yellow': 1, 'Not Yellow': 2} }
-#                   'politicalLabel': {'Conservative': 1, 'Liberal': 2, 'Neutral': 3},
-#                   'biasLabel': {'Biased': 1, 'Not Biased': 2}}
 
-# Gathers data and organizes into the described format for sklearn
-def organizeData(content):
-    # { 'data': ['article1', 'article2'], 'yellow': [targets], ... }
-    trainingData = {'data': []}
+    pwd = getcwd()
+    datafolder = path.join(pwd,'project_data')
 
-    # data -> ['article1', 'article2', ...]
-    # target -> [1, 2, 3, 2, 1, 3, ...] 1 = conservative, 2 = liberal, ... etc.
+    filelist = []
+    for root,subdirs,files in walk(datafolder):
+        for f in files:
+            fname = path.join(root,f)
+            filelist.append(fname)
 
-    for category in categories:
-        trainingData[category] = []
+    accuracy = 0.0
+    yellowPredictionAll = []
+    yellowTrueAll = []
 
-    files = os.listdir(training_folder)
-    for training_file in files:
-        # read in file, assign target for each category
-        with open(training_folder + training_file, 'r') as f:
+    for leave_idx in range(len(filelist)):
+        # Choose file under current leave_idx as a test file. Use the remaining data as training files.
+        trainlist = filelist[0:leave_idx-1] + filelist[leave_idx+1:]
+        testfile = filelist[leave_idx]
+
+        trainingData = []
+        trainYellowLabels = []
+
+        for trainfile in trainlist:
+            with open(trainfile, 'r') as f:
+                json_file = json.load(f)
+
+                #### TODO: change the uncommenting part as argument to program?
+                ## Uncomment line below to train on content
+                ## trainingData.append(json_file['content'])
+                ## Uncomment line below to train on titles
+                trainingData.append(json_file['title'])
+
+                # Store training labels in a separate list
+                trainYellowLabels.append(1 if json_file['yellowLabel'] == 'Yellow' else 0)
+
+        # At this point, we have training and test data files in separate lists.
+        # Implement classifer below.
+
+        ## CountVectorizer options:
+        # input = 'content' since data is stored as strings in lists. it would be 'file' if we stored each document as a
+        # .txt file.
+        # analyzer = 'word' means we use strings separated by whitespace as atoms in the vocabulary. we could use 'char'
+        # instead, but that will not be useful since yellow and non-yellow articles in English are likely to have same
+        # character distribution. However, yellow and non-yellow articles likely have different distributions of words
+        # which are used.
+        # stop_words = 'english' uses a standard english stopword dictionary (inbuilt)
+        # ngram_range = (1,3) forms vocabulary from 1 upto 3 word-grams (since analyzer = 'word'). This is useful since
+        # yellow articles may use different kinds of short "phrases" compared to non-yellow articles. However, very high
+        # max_value (e.g. (1,10)) makes computation time very large (vocabulary will be HUGE) and also features will
+        # become very high dimensional, so that distinguishing phrases will be sparser in the data and harder to find.
+        vectorizer = CountVectorizer(input='content',analyzer='word', stop_words = 'english', ngram_range=(1,3),decode_error='ignore')
+
+        # Not sure what sublinear_tf does, so I set it to False. Remaining options implement the tfidf we learned in
+        # class.
+        transformer = TfidfTransformer(norm='l2', use_idf=True, smooth_idf=True, sublinear_tf=False)
+        tdtrain = vectorizer.fit_transform(trainingData)
+        tfidftrain = transformer.fit_transform(tdtrain)
+
+        ## SVM implmentation - Uncomment below to use
+        # loss = l2: squared error loss between the predictive model and true data class, which is minimized to find the
+        # right model to classify test data. Standard in the literature, not very important.
+        # penalty = l1: This is important. It encourages sparsity in SVM solution. The intuition is that only some of
+        # the features are "important" features (tfids) which differentiate yellow vs non-yellow articles, while most of
+        # the other features are non important. Connect to how most words were common in the yellow vs non-yellow
+        # articles. This is also probably why SVM outperforms Naive Bayes to some extent.
+        # C = 100: algorithm parameter, has to be set through trial and error. No systematic way (that I know of) which
+        # sets it.
+        # clf = svm.LinearSVC(penalty = 'l1', loss = 'l2', C = 100, dual=False)
+
+        ## Naive Bayes implementation: As explained in class. Multinomial allows for more than two classes, and uses a
+        # multinomial distribution as prior for different classes. The NB we learned in class was for two classes and a
+        # special case of this classifier. Implementation details are not different from class.
+        clf = naive_bayes.MultinomialNB()
+
+        ## Non-linear SVM. Allows for non-linear decision boundaries between classes. In the Fig. in the report, we can
+        # find a line which best separates the two classes, i.e. a linear decision boundary. Most text classification is
+        # shown to be non-linear (i.e. we have to find a *curve* which separates the points). The shape of the curve is
+        # detemined by choice of kernel. (see wikipedia for figures of different kernels). I did NOT report these for
+        # the final, but you can run it to see how it performs. The disadvantage with non-linear SVMs is large
+        # computation time, as you will see if you run it.
+        # clf = svm.SVC(C = 10.0, kernel = 'rbf', max_iter = 1000)
+        clf.fit(tfidftrain, trainYellowLabels)
+
+        # Predict test data using trained classifier clf. Store true as well as predicted labels.
+        testData = []
+        with open(testfile, 'r') as f:
             json_file = json.load(f)
-            trainingData['data'].append(json_file[content])
-            for category in categories:
-                label = json_file[category]
-                trainingData[category].append(categoryTargets[category][label])
+            #testData.append(json_file['content'])
+            testData.append(json_file['title'])
+            yellowTrue = 1 if json_file['yellowLabel'] == 'Yellow' else 0
+            yellowTrueAll.append(yellowTrue)
 
-    return trainingData
+        tdtest = vectorizer.transform(testData)
+        tfidftest = transformer.transform(tdtest)
+        yellowPrediction = clf.predict(tfidftest)
+        yellowPredictionAll.append(yellowPrediction)
 
-# trains and returns svm classifier for each category
-# also performs leave one out cross validation
-def trainSVMClassifier(data):
-    classifiers = {}
-    for category in categories:
-        # build a pipeline using CountVectorizer, TfidfTransformer and SGDClassifier
-        text_clf = Pipeline([('vect', CountVectorizer()),\
-                             ('tfidf', TfidfTransformer()),\
-                             ('clf', SGDClassifier(loss='hinge',\
-                                                   penalty='l2',\
-                                                   alpha=1e-3,
-                                                   n_iter=5))])
-        loo = cross_validation.LeaveOneOut(len(data['data']))
-        correct = 0
-        total = len(data['data'])
 
-        for train_index, test_index in loo: # for each combination of leave one out
+        print "Predicted label = ", yellowPrediction,
+        print "True label = ", yellowTrue
 
-            # allows us to ignore certain articles for classificiation
-            # for example, we can only classify yellow articles to check accuracy for yellowness
-            # uncomment next three lines for functionality
-            # if data[category][test_index[0]] == 1: # use == 1 for non-yellow accuracy and == 0 for yellow accuracy
-            #     total -= 1
-            #     continue
+        accuracy += 1 if yellowPrediction[0] == yellowTrue else 0
+        print "Progress: ", leave_idx, '/', len(filelist)
 
-            # fit the data by choosing files based on leave one out
-            _ = text_clf.fit([data['data'][i] for i in train_index], [data[category][i] for i in train_index])
-            predicted = text_clf.predict([data['data'][test_index[0]]])
+    # Evaluation of accuracy, yellow and non yellow accuracy, should be self documenting.
+    accuracy = accuracy/len(filelist)
+    print "Accuracy = ", accuracy
 
-            try:
-                print "Article ", str(os.listdir(training_folder)[test_index[0]]), "is", categories[category][predicted[0]-1], "; Correct is", categories[category][data[category][test_index[0]]-1]
-                if predicted[0] == data[category][test_index[0]]:
-                    correct += 1
-            except: # if article did not contain any data due to scraping failure, ignore it
-                total -= 1
-                continue
-        print "Accuracy ", str(float(correct)/total)
-        classifiers[category] = text_clf
+    yellowAccuracy = 0.0
+    for x,y in zip(yellowPredictionAll, yellowTrueAll):
+        if (y == 1) and (x[0] == y):
+            yellowAccuracy += 1
+    yellowAccuracy = yellowAccuracy/len(filter(lambda x: x == 1, yellowTrueAll))
 
-    return classifiers
+    nonYellowAccuracy = 0.0
+    for x,y in zip(yellowPredictionAll, yellowTrueAll):
+        if (y == 0) and (x[0] == y):
+            nonYellowAccuracy += 1
+    nonYellowAccuracy = nonYellowAccuracy/len(filter(lambda x: x == 0, yellowTrueAll))
 
-# trains and returns naive bayes classifier for each category
-# also performs leave one out cross validation
-# this function performs the same function as the previous one but with different classifiers
-def trainNaiveBayesClassifier(data):
-    classifiers = {}
-    for category in categories:
-        # build a pipeline using CountVectorizer, TfidfTransformer and MultinomialNB
-        text_clf = Pipeline([('vect', CountVectorizer()),\
-                             ('tfidf', TfidfTransformer()),\
-                             ('clf', MultinomialNB())])
-        text_clf = text_clf.fit(data['data'], data[category])
-        loo = cross_validation.LeaveOneOut(len(data['data']))
-        correct = 0
-        total = len(data['data'])
+    print "Yellow Accuracy = ", yellowAccuracy,
+    print "Non Yellow Accuracy = ", nonYellowAccuracy
 
-        for train_index, test_index in loo:
-            # allows us to ignore certain articles for classificiation
-            # for example, we can only classify yellow articles to check accuracy for yellowness
-            # uncomment next three lines for functionality
-            # if data[category][test_index[0]] == 1: # use == 1 for non-yellow accuracy and == 0 for yellow accuracy
-            #     total -= 1
-            #     continue
-            _ = text_clf.fit([data['data'][i] for i in train_index], [data[category][i] for i in train_index])
-            predicted = text_clf.predict([data['data'][test_index[0]]])
 
-            try:
-                print "Article ", str(os.listdir(training_folder)[test_index[0]]), "is", categories[category][predicted[0]-1], "; Correct is", categories[category][data[category][test_index[0]]-1]
-                if predicted[0] == data[category][test_index[0]]:
-                    correct += 1
-            except:
-                total -= 1
-                continue
-        print "Accuracy ", str(float(correct)/total)
-        classifiers[category] = text_clf
-
-    return classifiers
-
-# classifies documents in the test set
-# we do not use this function as we chose to do leave one out
-def testClassifier(classifiers):
-    test_docs = []
-    files = os.listdir(test_folder)
-    for test_file in files:
-        with open(test_folder + test_file, 'r') as f:
-            json_file = json.load(f)
-            test_docs.append(json_file['content'])
-
-    for category in categories:
-        predicted = classifiers[category].predict(test_docs)
-
-        print "\nClassification of " + category + "\n"
-        #
-        for i, prediction in enumerate(predicted):
-            print files[i] + ',' + categories[category][prediction-1]
-
-# takes in an argument to choose classifier
-def main():
-    algorithm = sys.argv[1]
-    content = sys.argv[2]
-
-    trainingData = organizeData(content)
-
-    if algorithm == 'naivebayes':
-        classifiers = trainNaiveBayesClassifier(trainingData)
-    elif algorithm == 'svm':
-        classifiers = trainSVMClassifier(trainingData)
-    else:
-        classifiers = trainSVMClassifier(trainingData)
-
-    # testClassifier(classifiers)
-
-if __name__ == "__main__":
-    main()

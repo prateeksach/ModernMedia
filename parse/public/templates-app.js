@@ -68,15 +68,80 @@ angular.module("home/home.tpl.html", []).run(["$templateCache", function($templa
     "\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"topicInput\">Article Topic</label>\n" +
-    "        <input id=\"topicInput\" type=\"text\" class=\"form-control\" placeholder=\"ISIS, Crimea, etc.\" ng-model=\"addObj.topic\" />\n" +
+    "        <select class=\"form-control\" ng-model=\"addObj.topic\">\n" +
+    "          <option value=\"Marijuana Legalization\">Marijuana Legalization</option>\n" +
+    "          <option value=\"Abortion\">Abortion</option>\n" +
+    "          <option value=\"Gay Marriage\">Gay Marriage</option>\n" +
+    "          <option value=\"NSA Spying\">NSA Spying</option>\n" +
+    "          <option value=\"Obamacare\">Obamacare</option>\n" +
+    "          <option value=\"Climate Change\">Climate Change</option>\n" +
+    "          <option value=\"Immigration\">Immigration</option>\n" +
+    "          <option value=\"Gun Control\">Gun Control</option>\n" +
+    "        </select>\n" +
     "      </div>\n" +
     "\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"orgInput\">Article Organization</label>\n" +
-    "        <input id=\"orgInput\" type=\"text\" class=\"form-control\" placeholder=\"Fox, CNN, etc.\" ng-model=\"addObj.org\" />\n" +
+    "        <select class=\"form-control\" ng-model=\"addObj.org\">\n" +
+    "          <option value=\"USA Today\">USA Today</option>\n" +
+    "          <option value=\"New York Post\">New York Post</option>\n" +
+    "          <option value=\"CNN\">CNN</option>\n" +
+    "          <option value=\"FOX\">FOX</option>\n" +
+    "          <option value=\"ThinkProgress\">ThinkProgress</option>\n" +
+    "          <option value=\"Huffington Post\">Huffington Post</option>\n" +
+    "          <option value=\"New Republic\">New Republic</option>\n" +
+    "          <option value=\"LA Times\">LA Times</option>\n" +
+    "          <option value=\"New York Times\">New York Times</option>\n" +
+    "        </select>\n" +
     "      </div>\n" +
     "\n" +
-    "      <button type=\"submit\" class=\"btn btn-default\" ng-click=\"addLink()\">Add</button>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"topicInput\">Yellowism Label:&nbsp;&nbsp;&nbsp;</label>\n" +
+    "        <label class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" name=\"yellowLabel\" value=\"Yellow\" ng-model=\"addObj.yellowLabel\"> Yellow\n" +
+    "        </label>\n" +
+    "        <label class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" name=\"yellowLabel\" value=\"Not Yellow\" ng-model=\"addObj.yellowLabel\"> Not Yellow\n" +
+    "        </label>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"topicInput\">Political Label:&nbsp;&nbsp;&nbsp;</label>\n" +
+    "        <label class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" name=\"politicalLabel\" value=\"Conservative\" ng-model=\"addObj.politicalLabel\"> Conservative\n" +
+    "        </label>\n" +
+    "        <label class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" name=\"politicalLabel\" value=\"Liberal\" ng-model=\"addObj.politicalLabel\"> Liberal\n" +
+    "        </label>\n" +
+    "        <label class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" name=\"politicalLabel\" value=\"Neutral\" ng-model=\"addObj.politicalLabel\"> Neutral\n" +
+    "        </label>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"topicInput\">Bias Label:&nbsp;&nbsp;&nbsp;</label>\n" +
+    "        <label class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" name=\"biasLabel\" value=\"Biased\" ng-model=\"addObj.biasLabel\"> Biased\n" +
+    "        </label>\n" +
+    "        <label class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" name=\"biasLabel\" value=\"Not Biased\" ng-model=\"addObj.biasLabel\"> Not Biased\n" +
+    "        </label>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"topicInput\">Opinion Label:&nbsp;&nbsp;&nbsp;</label>\n" +
+    "        <label class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" name=\"opinionLabel\" value=\"Opinion Article\" ng-model=\"addObj.opinionLabel\"> Opinion Article\n" +
+    "        </label>\n" +
+    "        <label class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" name=\"opinionLabel\" value=\"Other\" ng-model=\"addObj.opinionLabel\"> Other\n" +
+    "        </label>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <button type=\"submit\" class=\"btn btn-default\" ng-click=\"addLink()\">\n" +
+    "        <span ng-if=\"isAddingLink\">Adding... Please Wait.</span>\n" +
+    "        <span ng-if=\"!isAddingLink\">Add Link</span>\n" +
+    "      </button>\n" +
     "    </form>\n" +
     "  </div>\n" +
     "</div>\n" +
