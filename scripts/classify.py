@@ -11,6 +11,8 @@ from sklearn import svm, naive_bayes
 
 if __name__ == '__main__':
 
+    classifier = argv[1]
+    content = argv[2]
 
     pwd = getcwd()
     datafolder = path.join(pwd,'project_data')
@@ -37,11 +39,12 @@ if __name__ == '__main__':
             with open(trainfile, 'r') as f:
                 json_file = json.load(f)
 
-                #### TODO: change the uncommenting part as argument to program?
-                ## Uncomment line below to train on content
-                ## trainingData.append(json_file['content'])
-                ## Uncomment line below to train on titles
-                trainingData.append(json_file['title'])
+                if content == "article":
+                    trainingData.append(json_file['content'])
+                elif content == "title":
+                    trainingData.append(json_file['title'])
+                else:
+                    trainingData.append(json_file['title'])
 
                 # Store training labels in a separate list
                 trainYellowLabels.append(1 if json_file['yellowLabel'] == 'Yellow' else 0)
@@ -78,12 +81,17 @@ if __name__ == '__main__':
         # articles. This is also probably why SVM outperforms Naive Bayes to some extent.
         # C = 100: algorithm parameter, has to be set through trial and error. No systematic way (that I know of) which
         # sets it.
-        # clf = svm.LinearSVC(penalty = 'l1', loss = 'l2', C = 100, dual=False)
 
         ## Naive Bayes implementation: As explained in class. Multinomial allows for more than two classes, and uses a
         # multinomial distribution as prior for different classes. The NB we learned in class was for two classes and a
         # special case of this classifier. Implementation details are not different from class.
-        clf = naive_bayes.MultinomialNB()
+
+        if classifier == "svm":
+            clf = svm.LinearSVC(penalty = 'l1', loss = 'l2', C = 100, dual=False)
+        elif classifier == "naivebayes":
+            clf = naive_bayes.MultinomialNB()
+        else:
+            clf = svm.LinearSVC(penalty = 'l1', loss = 'l2', C = 100, dual=False)
 
         ## Non-linear SVM. Allows for non-linear decision boundaries between classes. In the Fig. in the report, we can
         # find a line which best separates the two classes, i.e. a linear decision boundary. Most text classification is
@@ -98,8 +106,13 @@ if __name__ == '__main__':
         testData = []
         with open(testfile, 'r') as f:
             json_file = json.load(f)
-            #testData.append(json_file['content'])
-            testData.append(json_file['title'])
+            if content == "article":
+                testData.append(json_file['content'])
+            elif content == "title":
+                testData.append(json_file['title'])
+            else:
+                testData.append(json_file['title'])
+
             yellowTrue = 1 if json_file['yellowLabel'] == 'Yellow' else 0
             yellowTrueAll.append(yellowTrue)
 
