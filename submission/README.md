@@ -9,19 +9,74 @@
 
 An analysis of the accuracy, bias, and 'yellow-ness' of modern internet-based media and corresponding outlets.
 
-## Project Implementation README
+## Project Usage
 
-To run the code from the terminal, use
+Using the program is very simple. To perform leave one out classification on
+the data set (present in new_data), call classify.py with the classifier with
+two arguments: classifier and content type. The classifier argument has
+two options: svm and naivebayes; the content type argument also has
+two options: content and title. The classifier argument specifies which type of
+classifier to use in the program. The content type argument specifies whether to
+train and classifiy the news article titles or the article itself.
 
-    python classify.py [classifier] [content]
+For example, to use SVMs with titles,
 
-Where classifier and content are two arguments.
+   python classify.py svm title
 
-classifier has two options: svm and naivebayes
+to use naive Bayes with content,
 
-content has two options: article and title. 'article' means that the program will train
-and classify on the actual wrticle while 'title' means the program will train and
-classify on just the title
+   python classify.py naivebayes content
 
-The program outputs predicted label, true label and progress as files processed/total number of files. Once the
-code has iterated over all files, it outputs total accuracy, yellow accuracy and non yellow accuracy.
+The program needs both arguments to work
+
+# Structure
+
+classify.py is split into two main parts: organizeData() and the classifiers
+trainNaiveBayesClassifier() and trainSVMClassifier()
+
+organizeData() goes through each json file in the training set folder specified as
+"training_folder" in the code. It extracts the content of the article or the title
+depending on the argument provided from the JSON files and creates a data structure
+named trainingData that works with the sklearn classifiers.
+
+trainingData = {
+                'data': ['article1 lorem ipsum', 'article2 lorem ipsum', ...],
+                'yellowLabel': [targets],
+                'politicalLabel': [targets],
+                ...
+               }
+
+The data key contains the articles in an array and all other keys are the categories
+that we are classifying on. The targets array contains the label of the article at
+the same index specified as an integer. The map from label to integer is present
+in a map categoryTargets a the beginning of the file.
+
+categoryTargets = {
+                   'yellowLabel': {
+                                   'Yellow': 1,
+                                   'Not Yellow': 2
+                                  }
+                  }
+
+The categories you want to classify on are present nearby in the categories map.
+categories = {
+              'yellowLabel': ('Yellow', 'Not Yellow')
+             }
+
+To classify on categories other than yellowness, uncomment the lines that
+specify the other categores in both data structures.
+
+The two classifier functions are extremely similar except for the pipeline used
+which differs for the classifier. Each function constructs its respective pipeline,
+and creates a variable loo which returns a data structure for cross validation.
+With an argument n, it returns [([1, 2, ..., n], 0), ([0, 2, ..., n], 1), ...]
+which can be used to construct the data set on which to classify.
+For each combination in this array, the fuction fits the data using sklearn fit.
+We then classify the article that is left out and print a message which includes
+the classifcation and the correct classification. The function also keeps track of
+how many correct classifications are performed and prints an accuracy figure
+at the end of execution.
+
+There is an extra function testClassifier() which can be used for the standard
+training set, test set validation. Due to the small size of our data, we did not
+use this function and opted to use leave one out instead.
