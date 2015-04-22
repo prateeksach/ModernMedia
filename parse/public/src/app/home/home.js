@@ -39,7 +39,7 @@ angular.module( 'ngBoilerplate.home', [
  * And of course we define a controller for our route.
  */
 .controller( 'HomeCtrl', function HomeController( $scope ) {
-  $scope.addObj = {"url": "", "topic": "", "org": "", "yellowLabel": "", "politicalLabel": "", "biasLabel": "", "opinionLabel": ""};
+  $scope.addObj = {"url": "", "topic": "", "org": "", "yellowLabel": "", "politicalLabel": "", "biasLabel": "Biased", "opinionLabel": ""};
   $scope.isAddingLink = false;
 
   $scope.addLink = function() {

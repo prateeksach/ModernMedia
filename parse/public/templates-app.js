@@ -90,7 +90,6 @@ angular.module("home/home.tpl.html", []).run(["$templateCache", function($templa
     "          <option value=\"ThinkProgress\">ThinkProgress</option>\n" +
     "          <option value=\"Huffington Post\">Huffington Post</option>\n" +
     "          <option value=\"New Republic\">New Republic</option>\n" +
-    "          <option value=\"LA Times\">LA Times</option>\n" +
     "          <option value=\"New York Times\">New York Times</option>\n" +
     "        </select>\n" +
     "      </div>\n" +
@@ -118,7 +117,7 @@ angular.module("home/home.tpl.html", []).run(["$templateCache", function($templa
     "        </label>\n" +
     "      </div>\n" +
     "\n" +
-    "      <div class=\"form-group\">\n" +
+    "      <div class=\"form-group hide\">\n" +
     "        <label for=\"topicInput\">Bias Label:&nbsp;&nbsp;&nbsp;</label>\n" +
     "        <label class=\"radio-inline\">\n" +
     "          <input type=\"radio\" name=\"biasLabel\" value=\"Biased\" ng-model=\"addObj.biasLabel\"> Biased\n" +
